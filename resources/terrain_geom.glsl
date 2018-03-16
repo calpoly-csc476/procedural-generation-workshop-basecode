@@ -4,9 +4,11 @@ layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
 in vec3 gWorldPos[];
+in vec2 gTexCoords[];
 
 out vec3 fWorldPos;
 out vec3 fNormal;
+out vec2 fTexCoords;
 
 
 void main()
@@ -19,7 +21,7 @@ void main()
 	{
 		gl_Position = gl_in[i].gl_Position;
 		fWorldPos = gWorldPos[i];
-
+		fTexCoords = gTexCoords[i];
 		fNormal = Normal;
 		EmitVertex();
 	}

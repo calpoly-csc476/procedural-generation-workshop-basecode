@@ -1,10 +1,11 @@
 #version 330
 
-uniform vec3 uColor;
 uniform vec3 uLightPos;
 uniform vec3 uCameraPos;
+uniform sampler2D colorTex;
 
 in vec3 fWorldPos;
+in vec2 fTexCoords;
 in vec3 fNormal;
 
 out vec4 fragColor;
@@ -17,9 +18,11 @@ float saturate(float a)
 
 void main()
 {
-	vec3 k_a = 0.3 * uColor;
-	vec3 k_d = 0.7 * uColor;
-	vec3 k_s = vec3(0.5);
+	vec3 Color = texture(colorTex, fTexCoords).rgb;
+
+	vec3 k_a = 0.3 * Color;
+	vec3 k_d = 0.7 * Color;
+	vec3 k_s = vec3(0.1);
 	const float alpha = 100.0;
 
 	vec3 L = normalize(uLightPos);
@@ -29,4 +32,5 @@ void main()
 
 	fragColor.a = 1.0;
 	fragColor.rgb = k_a + k_d * saturate(dot(N, L)) + k_s * pow(saturate(dot(H, N)), alpha);
+	fragColor.rgb = Color;
 }
