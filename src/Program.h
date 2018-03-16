@@ -21,6 +21,7 @@ public:
 	bool isVerbose() const { return verbose; }
 
 	void setShaderNames(const std::string &v, const std::string &f);
+	void setShaderNames(const std::string &v, const std::string &g, const std::string &f);
 	virtual bool init();
 	virtual void bind();
 	virtual void unbind();
@@ -34,6 +35,7 @@ public:
 protected:
 
 	std::string vShaderName;
+	std::string gShaderName;
 	std::string fShaderName;
 
 private:

@@ -49,7 +49,7 @@ public:
 	WindowManager * windowManager = nullptr;
 
 	// Shaders
-	shared_ptr<Program> ColorProg;
+	shared_ptr<Program> TerrainProg;
 	shared_ptr<Program> BlinnPhongProg;
 
 	// Shapes
@@ -187,37 +187,34 @@ public:
 	void initGeom()
 	{
 		// Create the ground plane
-		const int groundSize = 21;
+		const int groundSize = 128;
 
 		vector<float> vertexData;
-		vector<unsigned short> indexData;
+		vector<unsigned int> indexData;
 
-		for (int i = 0; i < groundSize; ++ i)
+		for (int i = 0; i <= groundSize; ++ i)
 		{
-			vertexData.push_back((float) i);
-			vertexData.push_back(0);
-			vertexData.push_back(0);
-
-			vertexData.push_back((float) i);
-			vertexData.push_back(0);
-			vertexData.push_back((float) groundSize - 1.f);
-
-			indexData.push_back(i*2 + 0);
-			indexData.push_back(i*2 + 1);
+			for (int j = 0; j <= groundSize; ++ j)
+			{
+				vertexData.push_back((float) i);
+				vertexData.push_back(frand());
+				vertexData.push_back((float) j);
+			}
 		}
 
+		const int vertRowSize = groundSize + 1;
 		for (int i = 0; i < groundSize; ++ i)
 		{
-			vertexData.push_back(0);
-			vertexData.push_back(0);
-			vertexData.push_back((float) i);
+			for (int j = 0; j < groundSize; ++ j)
+			{
+				indexData.push_back(i + j * vertRowSize + 0);
+				indexData.push_back(i + j * vertRowSize + 1);
+				indexData.push_back(i + j * vertRowSize + vertRowSize);
 
-			vertexData.push_back((float) groundSize - 1.f);
-			vertexData.push_back(0);
-			vertexData.push_back((float) i);
-
-			indexData.push_back(groundSize*2 + i*2 + 0);
-			indexData.push_back(groundSize*2 + i*2 + 1);
+				indexData.push_back(i + j * vertRowSize + 1);
+				indexData.push_back(i + j * vertRowSize + 1 + vertRowSize);
+				indexData.push_back(i + j * vertRowSize + vertRowSize);
+			}
 		}
 
 		CHECKED_GL_CALL(glGenVertexArrays(1, &GroundVertexArray));
@@ -234,7 +231,7 @@ public:
 		GroundIndexCount = (int) indexData.size();
 		CHECKED_GL_CALL(glGenBuffers(1, &GroundIndexBuffer));
 		CHECKED_GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, GroundIndexBuffer));
-		CHECKED_GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * indexData.size(), indexData.data(), GL_STATIC_DRAW));
+		CHECKED_GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexData.size(), indexData.data(), GL_STATIC_DRAW));
 
 		CHECKED_GL_CALL(glBindVertexArray(0));
 	}
@@ -297,19 +294,21 @@ public:
 		BlinnPhongProg->addAttribute("vertPos");
 		BlinnPhongProg->addAttribute("vertNor");
 
-		ColorProg = make_shared<Program>();
-		ColorProg->setVerbose(true);
-		ColorProg->setShaderNames(RESOURCE_DIR + "color_vert.glsl", RESOURCE_DIR + "color_frag.glsl");
-		if (! ColorProg->init())
+		TerrainProg = make_shared<Program>();
+		TerrainProg->setVerbose(true);
+		TerrainProg->setShaderNames(RESOURCE_DIR + "terrain_vert.glsl", RESOURCE_DIR + "terrain_geom.glsl", RESOURCE_DIR + "terrain_frag.glsl");
+		if (! TerrainProg->init())
 		{
 			exit(1);
 		}
 
-		ColorProg->addUniform("P");
-		ColorProg->addUniform("V");
-		ColorProg->addUniform("M");
-		ColorProg->addUniform("uColor");
-		ColorProg->addAttribute("vertPos");
+		TerrainProg->addUniform("P");
+		TerrainProg->addUniform("V");
+		TerrainProg->addUniform("M");
+		TerrainProg->addUniform("uColor");
+		TerrainProg->addUniform("uLightPos");
+		TerrainProg->addUniform("uCameraPos");
+		TerrainProg->addAttribute("vertPos");
 	}
 
 
@@ -375,12 +374,12 @@ public:
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uLightPos"), g_light.x, g_light.y, g_light.z));
 
 		// draw the cube mesh
-		SetModel(vec3(-3, 0, 6), 0, 1, BlinnPhongProg);
+		SetModel(vec3(-3, 0, -6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.8f, 0.2f, 0.2f));
 		cube->draw(BlinnPhongProg);
 
 		// draw the sphere mesh
-		SetModel(vec3(3, 0, 6), 0, 1, BlinnPhongProg);
+		SetModel(vec3(-6, 0, -6), 0, 1, BlinnPhongProg);
 		CHECKED_GL_CALL(glUniform3f(BlinnPhongProg->getUniform("uColor"), 0.2f, 0.2f, 0.8f));
 		sphere->draw(BlinnPhongProg);
 
@@ -392,19 +391,21 @@ public:
 		BlinnPhongProg->unbind();
 
 
-		ColorProg->bind();
+		TerrainProg->bind();
 
-		SetProjectionMatrix(ColorProg);
-		SetView(ColorProg);
+		SetProjectionMatrix(TerrainProg);
+		SetView(TerrainProg);
+		CHECKED_GL_CALL(glUniform3f(TerrainProg->getUniform("uCameraPos"), cameraPos.x, cameraPos.y, cameraPos.z));
+		CHECKED_GL_CALL(glUniform3f(TerrainProg->getUniform("uLightPos"), g_light.x, g_light.y, g_light.z));
 
 		// draw the ground plane
-		SetModel(vec3(-10, 0, -10), 0, 1, ColorProg);
-		CHECKED_GL_CALL(glUniform3f(ColorProg->getUniform("uColor"), 0.8f, 0.8f, 0.8f));
+		SetModel(vec3(0, 0, 0), 0, 0.5f, TerrainProg);
+		CHECKED_GL_CALL(glUniform3f(TerrainProg->getUniform("uColor"), 0.8f, 0.8f, 0.8f));
 		CHECKED_GL_CALL(glBindVertexArray(GroundVertexArray));
-		CHECKED_GL_CALL(glDrawElements(GL_LINES, GroundIndexCount, GL_UNSIGNED_SHORT, 0));
+		CHECKED_GL_CALL(glDrawElements(GL_TRIANGLES, GroundIndexCount, GL_UNSIGNED_INT, 0));
 		CHECKED_GL_CALL(glBindVertexArray(0));
 
-		ColorProg->unbind();
+		TerrainProg->unbind();
 	}
 
 	void UpdateCamera(float const dT)
