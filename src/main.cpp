@@ -85,8 +85,8 @@ public:
 
 	vec3 cameraLookAt;
 
-	float cTheta = 3.14159f / 2.f;
-	float cPhi = -1.2f;
+	float cTheta = 3.14159f / 4.f;
+	float cPhi = -0.6f;
 	bool mouseDown = false;
 
 	double lastX = 0;
@@ -97,7 +97,7 @@ public:
 	bool moveBack = false;
 	bool moveLeft = false;
 	bool moveRight = false;
-	vec3 cameraPos = vec3(0, 4, -2);
+	vec3 cameraPos = vec3(0, 40, 0);
 	float cameraMoveSpeed = 3.0f;
 
 

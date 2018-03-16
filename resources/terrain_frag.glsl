@@ -32,5 +32,5 @@ void main()
 
 	fragColor.a = 1.0;
 	fragColor.rgb = k_a + k_d * saturate(dot(N, L)) + k_s * pow(saturate(dot(H, N)), alpha);
-	fragColor.rgb = Color;
+	// fragColor.rgb = Color;
 }
