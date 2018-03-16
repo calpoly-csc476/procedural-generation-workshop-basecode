@@ -92,6 +92,13 @@
     <ClInclude Include="Util.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\noise_frag.glsl" />
+    <None Include="..\resources\noise_vert.glsl" />
+    <None Include="..\resources\terrain_frag.glsl" />
+    <None Include="..\resources\terrain_geom.glsl" />
+    <None Include="..\resources\terrain_vert.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

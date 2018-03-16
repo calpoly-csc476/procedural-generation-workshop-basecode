@@ -66,5 +66,25 @@
     <Filter Include="Engine">
       <UniqueIdentifier>{d30f73f2-1442-4309-b69c-bf9e0825bad0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{eaf25852-8d9d-4a79-874e-7ac5c528bba8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resources\noise_frag.glsl">
+      <Filter>resources</Filter>
+    </None>
+    <None Include="..\resources\noise_vert.glsl">
+      <Filter>resources</Filter>
+    </None>
+    <None Include="..\resources\terrain_frag.glsl">
+      <Filter>resources</Filter>
+    </None>
+    <None Include="..\resources\terrain_geom.glsl">
+      <Filter>resources</Filter>
+    </None>
+    <None Include="..\resources\terrain_vert.glsl">
+      <Filter>resources</Filter>
+    </None>
   </ItemGroup>
 </Project>
