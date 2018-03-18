@@ -49,9 +49,60 @@ float fnoise(vec2 v)
 	return sum;
 }
 
+float rnoise(vec2 v)
+{
+	float sum = 0.0;
+	float freq = 1.0;
+	float amp = 1.0;
+
+	for (int i = 0; i < 16; ++ i)
+	{
+		float val = 1.0 - 2.0 * abs(snoise(v * freq));
+
+		sum += amp * val;
+
+		amp /= 2.5;
+		freq *= 2.0;
+	}
+
+	return sum;
+}
+
+float dnoise(vec2 v)
+{
+	vec2 distortion = vec2(
+		snoise(v + vec2(3.0)),
+		snoise(v - vec2(1.5)));
+
+	return snoise(v + distortion * 3.0);
+}
 
 void main()
 {
-	color = vec3(texCoord, 0.0);
-	height = fnoise(texCoord) * 40.0;
+	float elevation = rnoise(texCoord);
+	elevation = min(elevation, 0.75 + 0.25 * fnoise(texCoord * 4.0 + vec2(42.0)));
+
+
+	float colElevation = elevation + fnoise(texCoord * 8.0 + vec2(2.5, 3.11)) * 0.5;
+
+	color = vec3(1.0);
+
+	float river = fnoise(texCoord * 4.0 + vec2(7.0));
+
+
+	if (colElevation < 0.55)
+		color = vec3(0.3, 0.2, 0.0);
+	if (colElevation < 0.0)
+		color = vec3(0.1, 0.5, 0.1);
+
+	if (abs(river) < 0.05)
+	{
+		color = vec3(0.2, 0.2, 0.6);
+	}
+	height = elevation * 20.0;
+
+	if (abs(river) < 0.1)
+	{
+		height -= mix(0.0, 6.0, clamp(abs(abs(river) - 0.1) / 0.025, 0.0, 1.0));
+	}
 }

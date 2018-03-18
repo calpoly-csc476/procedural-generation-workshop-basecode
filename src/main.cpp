@@ -43,7 +43,7 @@ class Application : public EventCallbacks
 
 public:
 
-	const int terrainSize = 128;
+	const int terrainSize = 1024;
 
 	WindowManager * windowManager = nullptr;
 
